@@ -1,0 +1,28 @@
+name: RX7600 native probe build
+
+on:
+  push:
+    branches:
+      - experiment/rx7600-radv-tahoe
+    paths:
+      - 'gpu-port/tools/rx7600_pci_probe.c'
+      - 'gpu-port/tools/build_rx7600_pci_probe.sh'
+      - 'gpu-port/tools/rx7600_radv_shim_smoke.sh'
+      - '.github/workflows/rx7600-native-probe.yml'
+  workflow_dispatch:
+
+jobs:
+  compile:
+    runs-on: macos-15-intel
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check shell script syntax
+        run: |
+          sh -n gpu-port/tools/build_rx7600_pci_probe.sh
+          bash -n gpu-port/tools/rx7600_radv_shim_smoke.sh
+      - name: Compile read-only IOKit PCI probe
+        run: |
+          sh gpu-port/tools/build_rx7600_pci_probe.sh "$RUNNER_TEMP/rx7600_pci_probe"
+          file "$RUNNER_TEMP/rx7600_pci_probe"
+      - name: Note scope
+        run: echo "Compilation only. GitHub hosted runners do not have a passthrough RX 7600."
